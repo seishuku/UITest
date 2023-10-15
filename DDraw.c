@@ -685,7 +685,7 @@ int Init(void)
 	SetStick(&Sticks[4], &Points[0], &Points[2]);
 	SetStick(&Sticks[5], &Points[1], &Points[3]);
 
-	UI_Init(&UI, Width, Height);
+	UI_Init(&UI, Vec2b(0.0f), Vec2((float)Width, (float)Height));
 
 	UI_AddButton(&UI,
 				 Vec2((float)Width/2.0f, (float)Height/4.0f),

@@ -9,31 +9,39 @@
 #include "ui.h"
 
 // Initialize UI system.
-bool UI_Init(UI_t *UI, uint32_t Width, uint32_t Height)
+bool UI_Init(UI_t *UI, vec2 Position, vec2 Size)
 {
-	if(UI==NULL||Width==0||Height==0)
+	if(UI==NULL)
 		return false;
 
+	UI->IDBase=0;
+
 	// Set screen width/height
-	UI->Width=Width;
-	UI->Height=Height;
+	UI->Position=Position;
+	UI->Size=Size;
 
 	// Initial 10 pre-allocated list of buttons, uninitialized
 	List_Init(&UI->Controls, sizeof(UI_Control_t), 10, NULL);
 
+	memset(UI->Controls_Hashtable, 0, sizeof(UI_Control_t *)*UI_HASHTABLE_MAX);
+
 	return true;
+}
+
+void UI_Destroy(UI_t *UI)
+{
+	List_Destroy(&UI->Controls);
 }
 
 UI_Control_t *UI_FindControlByID(UI_t *UI, uint32_t ID)
 {
-	for(uint32_t i=0;i<List_GetCount(&UI->Controls);i++)
-	{
-		UI_Control_t *Control=(UI_Control_t *)List_GetPointer(&UI->Controls, i);
+	if(UI==NULL||ID>=UI_HASHTABLE_MAX||ID==UINT32_MAX)
+		return NULL;
 
-		// Check for matching ID and type
-		if(Control->ID==ID)
-			return Control;
-	}
+	UI_Control_t *Control=UI->Controls_Hashtable[ID];
+
+	if(Control->ID==ID)
+		return Control;
 
 	return NULL;
 }
@@ -115,11 +123,11 @@ bool UI_Draw(UI_t *UI, DDSURFACEDESC2 ddsd)
 				uint32_t y=(uint32_t)Control->Position.y;
 				uint32_t w=(uint32_t)Control->Button.Size.x;
 				uint32_t h=(uint32_t)Control->Button.Size.y;
-				uint32_t textlen=(uint32_t)strlen(Control->TitleText);
+				uint32_t textlen=(uint32_t)strlen(Control->Button.TitleText);
 
 				fillroundedrect(ddsd, x, y, x+w, y+h, 5, (float[]){ 1.0f, 1.0f, 1.0f });
 				fillroundedrect(ddsd, x+1, y+1, x+w, y+h, 5, (float[]){ 0.25f, 0.25f, 0.25f });
-				Font_Print(ddsd, x+(w-textlen*FONT_WIDTH)/2, y+(h-FONT_HEIGHT)/2, "%s", Control->TitleText);
+				Font_Print(ddsd, x+(w-textlen*FONT_WIDTH)/2, y+(h-FONT_HEIGHT)/2, "%s", Control->Button.TitleText);
 				break;
 			}
 
@@ -131,7 +139,7 @@ bool UI_Draw(UI_t *UI, DDSURFACEDESC2 ddsd)
 
 				circle(ddsd, x, y, r, (float[]){ 1.0f, 1.0f, 1.0f });
 				circle(ddsd, x+1, y+1, r, (float[]){ 0.25f, 0.25f, 0.25f });
-				Font_Print(ddsd, x+r+2, y-(FONT_HEIGHT/2), "%s", Control->TitleText);
+				Font_Print(ddsd, x+r+2, y-(FONT_HEIGHT/2), "%s", Control->CheckBox.TitleText);
 
 				if(Control->CheckBox.Value)
 					fillcircle(ddsd, x, y, r-3, (float *)&Control->Color.x);
@@ -144,14 +152,14 @@ bool UI_Draw(UI_t *UI, DDSURFACEDESC2 ddsd)
 				uint32_t y=(uint32_t)Control->Position.y;
 				uint32_t w=(uint32_t)Control->BarGraph.Size.x;
 				uint32_t h=(uint32_t)Control->BarGraph.Size.y;
-				uint32_t textlen=(uint32_t)strlen(Control->TitleText);
+				uint32_t textlen=(uint32_t)strlen(Control->BarGraph.TitleText);
 				float normalize_value=(Control->BarGraph.Value-Control->BarGraph.Min)/(Control->BarGraph.Max-Control->BarGraph.Min);
 				uint32_t value=(uint32_t)(normalize_value*(Control->BarGraph.Size.x-6));
 
 				roundedrect(ddsd, x, y, x+w, y+h, 5, (float[]){ 1.0f, 1.0f, 1.0f });
 				roundedrect(ddsd, x+1, y+1, x+w, y+h, 5, (float[]){ 0.25f, 0.25f, 0.25f });
 				fillroundedrect(ddsd, x+3, y+3, x+3+value, y-3+h, 2, (float *)&Control->Color.x);
-				Font_Print(ddsd, x+(w-textlen*FONT_WIDTH)/2, y+(h-FONT_HEIGHT)/2, "%s", Control->TitleText);
+				Font_Print(ddsd, x+(w-textlen*FONT_WIDTH)/2, y+(h-FONT_HEIGHT)/2, "%s", Control->BarGraph.TitleText);
 				break;
 			}
 		}

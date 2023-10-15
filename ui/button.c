@@ -11,9 +11,9 @@
 // Returns an ID, or UINT32_MAX on failure.
 uint32_t UI_AddButton(UI_t *UI, vec2 Position, vec2 Size, vec3 Color, const char *TitleText, UIControlCallback Callback)
 {
-	uint32_t ID=GenID();
+	uint32_t ID=UI->IDBase++;
 
-	if(ID==UINT32_MAX)
+	if(ID==UINT32_MAX||ID>=UI_HASHTABLE_MAX)
 		return UINT32_MAX;
 
 	UI_Control_t Control=
@@ -26,10 +26,12 @@ uint32_t UI_AddButton(UI_t *UI, vec2 Position, vec2 Size, vec3 Color, const char
 		.Button.Callback=Callback
 	};
 
-	snprintf(Control.TitleText, UI_CONTROL_TITLETEXT_MAX, "%s", TitleText);
+	snprintf(Control.Button.TitleText, UI_CONTROL_TITLETEXT_MAX, "%s", TitleText);
 
 	if(!List_Add(&UI->Controls, &Control))
 		return UINT32_MAX;
+
+	UI->Controls_Hashtable[ID]=List_GetPointer(&UI->Controls, List_GetCount(&UI->Controls)-1);
 
 	return ID;
 }
@@ -49,8 +51,8 @@ bool UI_UpdateButton(UI_t *UI, uint32_t ID, vec2 Position, vec2 Size, vec3 Color
 	{
 		Control->Position=Position;
 		Control->Color=Color;
-		snprintf(Control->TitleText, UI_CONTROL_TITLETEXT_MAX, "%s", TitleText);
 
+		snprintf(Control->Button.TitleText, UI_CONTROL_TITLETEXT_MAX, "%s", TitleText);
 		Control->Button.Size=Size;
 		Control->Button.Callback=Callback;
 
@@ -125,7 +127,7 @@ bool UI_UpdateButtonTitleText(UI_t *UI, uint32_t ID, const char *TitleText)
 
 	if(Control!=NULL&&Control->Type==UI_CONTROL_BUTTON)
 	{
-		snprintf(Control->TitleText, UI_CONTROL_TITLETEXT_MAX, "%s", TitleText);
+		snprintf(Control->Button.TitleText, UI_CONTROL_TITLETEXT_MAX, "%s", TitleText);
 		return true;
 	}
 

@@ -10,6 +10,8 @@ typedef void (*UIControlCallback)(void *arg);
 
 #define UI_CONTROL_TITLETEXT_MAX 128
 
+#define UI_HASHTABLE_MAX 8192
+
 typedef enum
 {
 	UI_CONTROL_BUTTON=0,
@@ -25,7 +27,6 @@ typedef struct
 	uint32_t ID;
 	vec2 Position;
 	vec3 Color;
-	char TitleText[UI_CONTROL_TITLETEXT_MAX];
 
 	// Specific to type
 	union
@@ -33,6 +34,7 @@ typedef struct
 		// Button type
 		struct
 		{
+			char TitleText[UI_CONTROL_TITLETEXT_MAX];
 			vec2 Size;
 			UIControlCallback Callback;
 		} Button;
@@ -40,6 +42,7 @@ typedef struct
 		// CheckBox type, should this also have a callback for flexibility?
 		struct
 		{
+			char TitleText[UI_CONTROL_TITLETEXT_MAX];
 			float Radius;
 			bool Value;
 		} CheckBox;
@@ -47,6 +50,7 @@ typedef struct
 		// BarGraph type
 		struct
 		{
+			char TitleText[UI_CONTROL_TITLETEXT_MAX];
 			vec2 Size;
 			bool Readonly;
 			float Min, Max, Value;
@@ -56,11 +60,21 @@ typedef struct
 
 typedef struct
 {
-	uint32_t Width, Height; // unused, will probably be needed for rendering later
+	// Position and size of whole UI system
+	vec2 Position, Size;
+
+	// Base ID for generating IDs
+	uint32_t IDBase;
+
+	// List of controls in UI
 	List_t Controls;
+
+	// Hashtable for quick lookup by ID
+	UI_Control_t *Controls_Hashtable[UI_HASHTABLE_MAX];
 } UI_t;
 
-bool UI_Init(UI_t *UI, uint32_t Width, uint32_t Height);
+bool UI_Init(UI_t *UI, vec2 Position, vec2 Size);
+void UI_Destroy(UI_t *UI);
 
 UI_Control_t *UI_FindControlByID(UI_t *UI, uint32_t ID);
 
