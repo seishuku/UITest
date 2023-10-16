@@ -46,57 +46,112 @@ UI_Control_t *UI_FindControlByID(UI_t *UI, uint32_t ID)
 	return NULL;
 }
 
+// Checks hit on UI controls, also processes certain controls, intended to be used on mouse button down events
 // Returns ID of hit, otherwise returns UINT32_MAX
-// Position could be mouse coords in the area where the controls are placed
+// Position is the cursor position to test against UI controls
 uint32_t UI_TestHit(UI_t *UI, vec2 Position)
 {
 	if(UI==NULL)
 		return UINT32_MAX;
 
+	// Offset by UI position
+	Position=Vec2_Addv(Position, UI->Position);
+
+	// Loop through all controls in the UI
 	for(uint32_t i=0;i<List_GetCount(&UI->Controls);i++)
 	{
 		UI_Control_t *Control=List_GetPointer(&UI->Controls, i);
 
 		switch(Control->Type)
 		{
-			case UI_CONTROL_BUTTON:
-				if(Position.x>=Control->Position.x&&Position.x<=Control->Position.x+Control->Button.Size.x&&
-				   Position.y>=Control->Position.y&&Position.y<=Control->Position.y+Control->Button.Size.y)
-				{
-					// TODO: This could potentionally be an issue if the callback blocks
-					if(Control->Button.Callback)
-						Control->Button.Callback(NULL);
+		case UI_CONTROL_BUTTON:
+			if(Position.x>=Control->Position.x&&Position.x<=Control->Position.x+Control->Button.Size.x&&
+			   Position.y>=Control->Position.y&&Position.y<=Control->Position.y+Control->Button.Size.y)
+			{
+				// TODO: This could potentionally be an issue if the callback blocks
+				if(Control->Button.Callback)
+					Control->Button.Callback(NULL);
+
+				return Control->ID;
+			}
+			break;
+
+		case UI_CONTROL_CHECKBOX:
+			vec2 Normal=Vec2_Subv(Control->Position, Position);
+
+			if(Vec2_Dot(Normal, Normal)<=Control->CheckBox.Radius*Control->CheckBox.Radius)
+			{
+				Control->CheckBox.Value=!Control->CheckBox.Value;
+				return Control->ID;
+			}
+			break;
+
+			// Only return the ID of this control
+		case UI_CONTROL_BARGRAPH:
+			if(!Control->BarGraph.Readonly)
+			{
+				// If hit inside control area, map hit position to point on bargraph and set the value scaled to the set min and max
+				if(Position.x>=Control->Position.x&&Position.x<=Control->Position.x+Control->BarGraph.Size.x&&
+				   Position.y>=Control->Position.y&&Position.y<=Control->Position.y+Control->BarGraph.Size.y)
 					return Control->ID;
-				}
-				break;
+			}
+			break;
 
-			case UI_CONTROL_CHECKBOX:
-				vec2 Normal=Vec2_Subv(Control->Position, Position);
+		case UI_CONTROL_SPRITE:
+			break;
 
-				if(Vec2_Dot(Normal, Normal)<=Control->CheckBox.Radius*Control->CheckBox.Radius)
-				{
-					Control->CheckBox.Value=!Control->CheckBox.Value;
-					return Control->ID;
-				}
-				break;
-
-			case UI_CONTROL_BARGRAPH:
-				if(!Control->BarGraph.Readonly)
-				{
-					// If hit inside control area, map hit position to point on bargraph and set the value scaled to the set min and max
-					if(Position.x>=Control->Position.x&&Position.x<=Control->Position.x+Control->BarGraph.Size.x&&
-					   Position.y>=Control->Position.y&&Position.y<=Control->Position.y+Control->BarGraph.Size.y)
-					{
-						Control->BarGraph.Value=((Position.x-Control->Position.x)/Control->BarGraph.Size.x)*(Control->BarGraph.Max-Control->BarGraph.Min)+Control->BarGraph.Min;
-						return Control->ID;
-					}
-				}
-				break;
+		case UI_CONTROL_CURSOR:
+			break;
 		}
 	}
 
 	// Nothing found
 	return UINT32_MAX;
+}
+
+// Processes hit on certain UI controls by ID (returned by UI_TestHit), intended to be used by "mouse move" events.
+// Returns false on error
+// Position is the cursor position to modify UI controls
+bool UI_ProcessControl(UI_t *UI, uint32_t ID, vec2 Position)
+{
+	if(UI==NULL||ID==UINT32_MAX)
+		return false;
+
+	// Offset by UI position
+	Position=Vec2_Addv(Position, UI->Position);
+
+	// Get the control from the ID
+	UI_Control_t *Control=UI_FindControlByID(UI, ID);
+
+	if(Control==NULL)
+		return false;
+
+	switch(Control->Type)
+	{
+	case UI_CONTROL_BUTTON:
+		break;
+
+	case UI_CONTROL_CHECKBOX:
+		break;
+
+	case UI_CONTROL_BARGRAPH:
+		if(!Control->BarGraph.Readonly)
+		{
+			// If hit inside control area, map hit position to point on bargraph and set the value scaled to the set min and max
+			if(Position.x>=Control->Position.x&&Position.x<=Control->Position.x+Control->BarGraph.Size.x&&
+			   Position.y>=Control->Position.y&&Position.y<=Control->Position.y+Control->BarGraph.Size.y)
+				Control->BarGraph.Value=((Position.x-Control->Position.x)/Control->BarGraph.Size.x)*(Control->BarGraph.Max-Control->BarGraph.Min)+Control->BarGraph.Min;
+		}
+		break;
+
+	case UI_CONTROL_SPRITE:
+		break;
+
+	case UI_CONTROL_CURSOR:
+		break;
+	}
+
+	return true;
 }
 
 void point(DDSURFACEDESC2 ddsd, uint32_t x, uint32_t y, float c[3]);

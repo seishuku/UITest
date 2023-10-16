@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <ddraw.h>
 #include "../utils/list.h"
 
 // Does the callback really need args? (userdata?)
@@ -17,6 +18,8 @@ typedef enum
 	UI_CONTROL_BUTTON=0,
 	UI_CONTROL_CHECKBOX,
 	UI_CONTROL_BARGRAPH,
+	UI_CONTROL_SPRITE,
+	UI_CONTROL_CURSOR,
 	UI_NUM_CONTROLTYPE
 } UI_ControlType;
 
@@ -55,6 +58,21 @@ typedef struct
 			bool Readonly;
 			float Min, Max, Value;
 		} BarGraph;
+
+		// Sprite type
+		struct
+		{
+//			uint32_t DescriptorSetOffset;
+//			VkuImage_t *Image;
+			vec2 Size;
+			float Rotation;
+		} Sprite;
+
+		// Cursur type
+		struct
+		{
+			float Radius;
+		} Cursor;
 	};
 } UI_Control_t;
 
@@ -118,6 +136,7 @@ float UI_GetBarGraphMax(UI_t *UI, uint32_t ID);
 float UI_GetBarGraphValue(UI_t *UI, uint32_t ID);
 
 uint32_t UI_TestHit(UI_t *UI, vec2 Position);
+bool UI_ProcessControl(UI_t *UI, uint32_t ID, vec2 Position);
 bool UI_Draw(UI_t *UI, DDSURFACEDESC2 ddsd);
 
 #endif

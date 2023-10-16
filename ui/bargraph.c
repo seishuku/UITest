@@ -1,10 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "../utils/genid.h"
 #include "../math/math.h"
 #include "../utils/list.h"
-#include "../font/font.h"
 #include "ui.h"
 
 uint32_t UI_AddBarGraph(UI_t *UI, vec2 Position, vec2 Size, vec3 Color, const char *TitleText, bool Readonly, float Min, float Max, float Value)

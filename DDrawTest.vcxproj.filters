@@ -60,9 +60,6 @@
     <ClCompile Include="math\vec4.c">
       <Filter>Source Files\math</Filter>
     </ClCompile>
-    <ClCompile Include="utils\genid.c">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
     <ClCompile Include="utils\list.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
@@ -81,13 +78,16 @@
     <ClCompile Include="ui\bargraph.c">
       <Filter>Source Files\ui</Filter>
     </ClCompile>
+    <ClCompile Include="ui\cursor.c">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\sprite.c">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math\math.h">
       <Filter>Header Files\math</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\genid.h">
-      <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\list.h">
       <Filter>Header Files\utils</Filter>

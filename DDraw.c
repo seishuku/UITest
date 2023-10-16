@@ -203,6 +203,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #include <windowsx.h>
 
+uint32_t ActiveID=UINT32_MAX;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -229,6 +231,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		Y=(float)GET_Y_LPARAM(lParam);
 
 		MouseClicked=true;
+		ActiveID=UI_TestHit(&UI, Vec2(X, Y));
 		break;
 
 	case WM_LBUTTONUP:
@@ -237,7 +240,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		ShowCursor(TRUE);
 		MouseClicked=false;
 
-		UI_TestHit(&UI, Vec2(X, Y));
+		ActiveID=UINT32_MAX;
 		break;
 
 	case WM_MOUSEMOVE:
@@ -245,7 +248,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			X=(float)GET_X_LPARAM(lParam);
 			Y=(float)GET_Y_LPARAM(lParam);
-			UI_TestHit(&UI, Vec2(X, Y));
+
+			if(ActiveID!=UINT32_MAX)
+				UI_ProcessControl(&UI, ActiveID, Vec2(X, Y));
 		}
 		break;
 

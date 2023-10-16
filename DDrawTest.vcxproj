@@ -30,15 +30,15 @@
     <ClCompile Include="ui\bargraph.c" />
     <ClCompile Include="ui\button.c" />
     <ClCompile Include="ui\checkbox.c" />
+    <ClCompile Include="ui\cursor.c" />
+    <ClCompile Include="ui\sprite.c" />
     <ClCompile Include="ui\ui.c" />
-    <ClCompile Include="utils\genid.c" />
     <ClCompile Include="utils\list.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="font\font.h" />
     <ClInclude Include="math\math.h" />
     <ClInclude Include="ui\ui.h" />
-    <ClInclude Include="utils\genid.h" />
     <ClInclude Include="utils\list.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
